@@ -25,10 +25,14 @@ The Interface
 ``branches``
     Get a nice pretty list of available branches.
 
-``sync [<branch>]``
+``sync [<remote>] [<branch>]``
     Syncronizes the given branch. Defaults to current branch.
     Stash, Fetch, Auto-Merge/Rebase, Push, and Unstash.
     You can only sync published branches.
+
+``pull [<remote>] <branch>``
+    Pull and rebase from upstream.
+    Stash, Fetch, Auto-Merge/Rebase and Unstash.
 
 ``switch <branch>``
     Switches to specified branch.
@@ -46,10 +50,10 @@ The Interface
     Auto-Merge/Rebase of specified branch into the second branch.
     Immediately removes specified branch. You can only graft unpublished branches.
 
-``publish <branch>``
+``publish [<remote>] <branch>``
     Publishes specified branch to the remote.
 
-``unpublish <branch>``
+``unpublish [<remote>] <branch>``
     Removes specified branch from the remote.
 
 ``install``
@@ -74,6 +78,5 @@ To install the git aliases, run the following command::
 Caveats
 -------
 
-- All remote operations are carried out by the remote identified in ``$ git config legit.remote remotename``
 - If a ``stash pop`` merge fails, Legit stops. I'd like to add checking for a failed merge, and undo the command with friendly error reporting.
 - ``pip install`` is cumbersome to people unfamiliar with Python. Package. (Py2App + PyInstaller)
