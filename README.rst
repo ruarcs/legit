@@ -41,11 +41,11 @@ The Interface
 
 ``sprout <branch> <new-branch>``
     Creates a new branch off of the specified branch.
-    Swiches to it immediately. Aliased as <i>newbranch</i>.
+    Swiches to it immediately. Aliased as: ``newbranch``
 
 ``harvest [<branch>] <into-branch>``
     Auto-Merge/Rebase of specified branch changes into the second branch.
-    Aliased as <i>mergeinto</i>.
+    Aliased as: ``mergeinto``
 
 ``graft <branch> <into-branch>``
     Auto-Merge/Rebase of specified branch into the second branch.
