@@ -223,57 +223,41 @@ def get_repo():
 # This operation now happens on-the-fly rather than at startup.
 # This gives us user the option to use any available git remotes
 # rather than just the default one.
-def get_remote(remote_alias):
+def get_remote(remote_name):
 
     repo_check(require_remote=True)
 
-    reader = repo.config_reader()
-
-    if remote_alias.length() == 0:
+    if remote_name.length() == 0:
 
         # No preferred remote was given. We will push to the default
         # upstream repo. 
 
-        # If there is no legit section return the default remote.
-        if not reader.has_section('legit'):
+        # If there is only one remote then return this
+        if has_one_remote():
             return repo.remotes[0]
 
-        # If there is no remote option in the legit section return the default.
-        # With the addition of multiple repos the name for the default repo has
-        # changed from "repo" to "default".
-        if not any('legit' in s and 'default' in s for s in reader.sections()):
-            return repo.remotes[0]
-
-        remote_name = reader.get('legit', 'default')
-        if not remote_name in [r.name for r in repo.remotes]:
-            raise ValueError('Default repo has not been set! Please update your git '
-                             'configuration or specify a remote. The list of '
-                             'available remotes is {1}'.format(repo.remotes))
-
-        return repo.remote(remote_name)
+        else:
+        # If more than one remote then prompt the user to specify one.
+            raise ValueError('You have more than one remote set up. Please select '
+                             'a remote by specifying a remote name. The list of '
+                             'available remotes is {0}'.format(repo.remotes))
+            return None
 
     else:
 
         # We have a name given for the remote. We must do our best to resolve this
         # and communicate with this upstream repo.
 
-        # If there is no legit section then raise an error.
-        if not reader.has_section('legit'):
-            raise ValueError('No custom remotes are configured. If you wish to '
-                             'push to the default repo don\'t specify a remote '
-                             'name. If you wish to add a custom remote use the '
-                             '"legit remote add" command.')
-
-        # If there is no remote option in the legit section return the default.
-        # With the addition of multiple repos the name for the default repo has
-        # changed from "repo" to "default".
-        if not any('legit' in s and remote_alias in s for s in reader.sections()):
-            raise ValueError('No custom remote named {0} exists'.format(remote_alias)))
-
-        # We now know that the "legit" section exists, and then there is an entry
-        # for the given remote alias. We now need to know which git remote it specifies,
-        # and if this is in fact an existing git remote.
-       
+        remote_index = remote_exists(remote_name)
+        if remote_index >= 0 
+            # If "remote"exists" returns a valid index then the remote exists.
+            return repo.remotes[remote_index]
+        else
+            # Otherwise raise an error and tell the user to check their setup.
+            raise ValueError('The specified remote could not be found. Check your '
+                             'current remotes by running "git remote -v". '
+                             'You can add a remote using "git remote add $NAME".')
+            return None
 
 
 def get_branches(local=True, remote_branches=True):
@@ -316,6 +300,14 @@ def get_branch_names(local=True, remote_branches=True):
     branches = get_branches(local=local, remote_branches=remote_branches)
 
     return [b.name for b in branches]
+
+
+def has_one_remote():
+    return True
+
+
+def remote_exists(remote_name):
+    return 0
 
 
 repo = get_repo()
