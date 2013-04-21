@@ -30,6 +30,10 @@ The Interface
     Stash, Fetch, Auto-Merge/Rebase, Push, and Unstash.
     You can only sync published branches.
 
+``update [<remote>] [<branch>]``
+    Updates the given branch. Defaults to current branch.
+    Stash, Fetch, Auto-Merge/Rebase and Unstash.
+
 ``switch <branch>``
     Switches to specified branch.
     Defaults to current branch.
