@@ -225,6 +225,8 @@ def cmd_sprout(args):
         colored.yellow(off_branch), colored.yellow(new_branch)),
         off_branch, new_branch)
 
+def cmd_newbranch(args):
+    cmd_sprout(args)
 
 def cmd_graft(args):
     """Merges an unpublished branch into the given branch, then deletes it."""
@@ -309,6 +311,29 @@ def cmd_unpublish(args):
     status_log(unpublish_branch, 'Unpublishing {0}.'.format(
         colored.yellow(branch)), branch)
 
+def cmd_deletebranch(args):
+    """Removes a published branch from the remote repository"""
+    """and from the local repository."""
+
+    branch = fuzzy_match_branch(args.get(0))
+
+    if not branch:
+        print 'Please specify a branch to unpublish:'
+        display_available_branches()
+        sys.exit()
+
+    branch_names = get_branch_names(local=False)
+
+    if branch not in branch_names:
+        print "{0} isn't published. Use a branch that is.".format(
+            colored.yellow(branch))
+        sys.exit(1)
+
+    #TODO: Put in git call to delete branch.
+
+    status_log(unpublish_branch, 'Unpublishing {0}.'.format(
+        colored.yellow(branch)), branch)    
+
 
 def cmd_harvest(args):
     """Syncs a branch with given branch. Defaults to current."""
@@ -349,6 +374,8 @@ def cmd_harvest(args):
     if unstash_index():
         status_log(unstash_it, 'Restoring local changes.')
 
+def mergeinto(args):
+    cmd_harvest(args)
 
 #
 
