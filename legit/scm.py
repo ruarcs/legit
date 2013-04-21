@@ -107,13 +107,13 @@ def fetch(remote):
     return repo.git.execute([git, 'fetch', remote.name])
 
 
-def smart_pull(remote_alias = ""):
+def smart_pull(remote_name = ""):
     'git log --merges origin/master..master'
 
     repo_check()
 
     branch = repo.head.ref.name
-    remote = get_remote(remote_alias)
+    remote = get_remote(remote_name)
 
     fetch(remote)
 
@@ -142,11 +142,11 @@ def smart_merge(branch, allow_rebase=True):
 
 
 
-def push(branch=None, remote_alias = ""):
+def push(branch=None, remote_name = ""):
 
     repo_check()
 
-    remote = get_remote(remote_alias)
+    remote = get_remote(remote_name)
 
     if branch is None:
         return repo.git.execute([git, 'push'])
@@ -248,7 +248,7 @@ def get_remote(remote_name):
         # We have a name given for the remote. We must do our best to resolve this
         # and communicate with this upstream repo.
 
-        remote_index = remote_exists(remote_name)
+        remote_index = get_remote_index(remote_name)
         if remote_index >= 0 
             # If "remote"exists" returns a valid index then the remote exists.
             return repo.remotes[remote_index]
@@ -301,12 +301,14 @@ def get_branch_names(local=True, remote_branches=True):
 
     return [b.name for b in branches]
 
-
+# Return TRUE if the repo has one remote, or FALSE if it has multiple
+# remotes.
 def has_one_remote():
     return True
 
-
-def remote_exists(remote_name):
+# Look through the list of remotes belonging to this repo and return
+# the index of the remote given.
+def get_remote_index(remote_name):
     return 0
 
 
