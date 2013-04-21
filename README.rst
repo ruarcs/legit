@@ -30,10 +30,6 @@ The Interface
     Stash, Fetch, Auto-Merge/Rebase, Push, and Unstash.
     You can only sync published branches.
 
-``pull [<remote>] <branch>``
-    Pull and rebase from upstream.
-    Stash, Fetch, Auto-Merge/Rebase and Unstash.
-
 ``switch <branch>``
     Switches to specified branch.
     Defaults to current branch.
@@ -41,10 +37,11 @@ The Interface
 
 ``sprout <branch> <new-branch>``
     Creates a new branch off of the specified branch.
-    Swiches to it immediately.
+    Swiches to it immediately. Aliased as <i>newbranch</i>.
 
 ``harvest [<branch>] <into-branch>``
     Auto-Merge/Rebase of specified branch changes into the second branch.
+    Aliased as <i>mergeinto</i>.
 
 ``graft <branch> <into-branch>``
     Auto-Merge/Rebase of specified branch into the second branch.
@@ -55,6 +52,9 @@ The Interface
 
 ``unpublish [<remote>] <branch>``
     Removes specified branch from the remote.
+
+``deletebranch [<remote>] <branch>``
+    Removes specified branch from the remote and from local repository.
 
 ``install``
     Installs legit git aliases.
