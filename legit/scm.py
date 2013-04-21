@@ -100,21 +100,22 @@ def unstash_it(sync=False):
             'stash', 'pop', 'stash@{{{0}}}'.format(stash_index)])
 
 
-def fetch():
+def fetch(remote):
 
     repo_check()
 
     return repo.git.execute([git, 'fetch', remote.name])
 
 
-def smart_pull():
+def smart_pull(remote_alias = ""):
     'git log --merges origin/master..master'
 
     repo_check()
 
     branch = repo.head.ref.name
+    remote = get_remote(remote_alias)
 
-    fetch()
+    fetch(remote)
 
     return smart_merge('{0}/{1}'.format(remote.name, branch))
 
@@ -141,9 +142,11 @@ def smart_merge(branch, allow_rebase=True):
 
 
 
-def push(branch=None):
+def push(branch=None, remote_alias = ""):
 
     repo_check()
+
+    remote = get_remote(remote_alias)
 
     if branch is None:
         return repo.git.execute([git, 'push'])
@@ -217,27 +220,60 @@ def get_repo():
     else:
         return None
 
-
-def get_remote():
+# This operation now happens on-the-fly rather than at startup.
+# This gives us user the option to use any available git remotes
+# rather than just the default one.
+def get_remote(remote_alias):
 
     repo_check(require_remote=True)
 
     reader = repo.config_reader()
 
-    # If there is no legit section return the default remote.
-    if not reader.has_section('legit'):
-        return repo.remotes[0]
+    if remote_alias.length() == 0:
 
-    # If there is no remote option in the legit section return the default.
-    if not any('legit' in s and 'remote' in s for s in reader.sections()):
-        return repo.remotes[0]
+        # No preferred remote was given. We will push to the default
+        # upstream repo. 
 
-    remote_name = reader.get('legit', 'remote')
-    if not remote_name in [r.name for r in repo.remotes]:
-        raise ValueError('Remote "{0}" does not exist! Please update your git '
-                         'configuration.'.format(remote_name))
+        # If there is no legit section return the default remote.
+        if not reader.has_section('legit'):
+            return repo.remotes[0]
 
-    return repo.remote(remote_name)
+        # If there is no remote option in the legit section return the default.
+        # With the addition of multiple repos the name for the default repo has
+        # changed from "repo" to "default".
+        if not any('legit' in s and 'default' in s for s in reader.sections()):
+            return repo.remotes[0]
+
+        remote_name = reader.get('legit', 'default')
+        if not remote_name in [r.name for r in repo.remotes]:
+            raise ValueError('Default repo has not been set! Please update your git '
+                             'configuration or specify a remote. The list of '
+                             'available remotes is {1}'.format(repo.remotes))
+
+        return repo.remote(remote_name)
+
+    else:
+
+        # We have a name given for the remote. We must do our best to resolve this
+        # and communicate with this upstream repo.
+
+        # If there is no legit section then raise an error.
+        if not reader.has_section('legit'):
+            raise ValueError('No custom remotes are configured. If you wish to '
+                             'push to the default repo don\'t specify a remote '
+                             'name. If you wish to add a custom remote use the '
+                             '"legit remote add" command.')
+
+        # If there is no remote option in the legit section return the default.
+        # With the addition of multiple repos the name for the default repo has
+        # changed from "repo" to "default".
+        if not any('legit' in s and remote_alias in s for s in reader.sections()):
+            raise ValueError('No custom remote named {0} exists'.format(remote_alias)))
+
+        # We now know that the "legit" section exists, and then there is an entry
+        # for the given remote alias. We now need to know which git remote it specifies,
+        # and if this is in fact an existing git remote.
+       
 
 
 def get_branches(local=True, remote_branches=True):
@@ -283,4 +319,43 @@ def get_branch_names(local=True, remote_branches=True):
 
 
 repo = get_repo()
-remote = get_remote()
+
+
+###################### TO DO: FOR MULTIPLE BRANCHES ######################
+#
+# 1.    Add a lot more error checking that we have received a remote
+#       from "get_remote".
+#
+# 2.    Consider the way we're handling multiple remotes. Would it be a
+#       lot more intuitive to just use the existing git remotes:
+#
+#       IF (no remotes)
+#       |
+#       |   Raise an exception.
+#       |
+#       ELSE IF (only one remote exists)
+#       |
+#       |   IF (no remote specified)
+#       |       Assume we want to push/pull this.
+#       |
+#       |   ELSE IF (remote specified)
+#       |       Raise an exception if user tries to give a specific remote
+#       |       that isn't the existing one.
+#       |
+#       ELSE IF (more than one remote)
+#       |
+#       |   IF (no remote specified)
+#       |
+#       |       IF ("origin" exists)
+#       |           Push/pull to this.
+#       |       ELSE
+#       |           Raise an exception. Tell user to specify a remote.
+#       |
+#       |   ELSE IF (remote specified)
+#       |       
+#       |       IF (this remote exists)
+#       |           Push/pull to this.
+#       |       ELSE
+#       |           Raise an exception. Tell user to specify a valid remote.
+#                   
+#           
