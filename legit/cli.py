@@ -361,13 +361,21 @@ def cmd_deletebranch(args):
         sys.exit()
 
     branch_names = get_branch_names(local=False)
+    local_branch_names = get_branch_names(local=True)
 
     if branch not in branch_names:
         print "{0} isn't published. Use a branch that is.".format(
             colored.yellow(branch))
         sys.exit(1)
 
-    #TODO: Put in git call to delete branch.
+    # Delete local branch.
+    if branch in local_branch_names:
+        repo.git.execute([git, 'branch -D', branch])
+    else
+        print "{0} isn't an existing branch!".format(
+            colored.yellow(branch))
+        sys.exit(1)
+        
 
     status_log(unpublish_branch, 'Unpublishing {0}.'.format(
         colored.yellow(branch)), branch)    
